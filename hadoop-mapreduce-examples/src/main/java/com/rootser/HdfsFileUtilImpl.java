@@ -36,7 +36,7 @@ public class HdfsFileUtilImpl implements HdfsFileUtil{
 	FileSystem hdfs;
 	
 	
-	public BufferedWriter openBufferedWriter(String filePath) throws IOException{
+	public BufferedWriter openHdfsBufferedWriter(String filePath) throws IOException{
 		Path newfile = (Path.mergePaths( file, new Path(filePath)));
 		if ( hdfs.exists( newfile)) {
 			hdfs.delete( newfile, true ); 

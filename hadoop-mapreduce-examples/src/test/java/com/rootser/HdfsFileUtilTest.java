@@ -59,7 +59,7 @@ public class HdfsFileUtilTest {
 	@Test
 	public void writeTest() throws IOException {
 
-		BufferedWriter br = util.openBufferedWriter(test2FileName);
+		BufferedWriter br = util.openHdfsBufferedWriter(test2FileName);
 		String testStr = "hello much improved file system object.";
 		br.write(testStr);
 		br.close();

@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.Random;
 
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
@@ -17,12 +18,20 @@ public class MapInputGenerator {
 	@Autowired
 	Random rand;
 	
-	public void run() throws IOException{
-		BufferedWriter br = util.openBufferedWriter("test.txt");
-		for (int i = 0; i < Integer.MAX_VALUE; i++){
-			br.write(rand.nextInt());
+	private void createMatrixFile(String fileName) throws IOException{
+		BufferedWriter br = util.openHdfsBufferedWriter(fileName);
+		for (int i = 0; i < 1000; i++){
+			for (int j = 0; j  < 1000; j++){
+				br.write(rand.nextDouble() + " ");
+			}
+			br.write("\n");
 		}
 		br.close();
+	}
+	
+	public void run() throws IOException{
+		createMatrixFile("/tmp/matrix1.txt");
+		createMatrixFile("/tmp/matrix2.txt");
 	}
 
 	public static void main(String[] args) throws Exception{
@@ -30,7 +39,12 @@ public class MapInputGenerator {
 				"HdfsAppContext.xml");
 		
 		MapInputGenerator mgen = (MapInputGenerator) context.getBean(com.rootser.MapInputGenerator.class);
-		mgen.run();
+		
+		try {
+			mgen.run();
+		} catch(IOException e){
+			System.out.println("add proper logging");
+		}
 		
 		((ClassPathXmlApplicationContext) context).close();
 	}
