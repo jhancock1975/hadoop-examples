@@ -27,8 +27,9 @@
 		<constructor-arg ref="uri" />
 		<constructor-arg ref="hadoopConf" />
 	</bean>
-
-	<!--<bean id="gen" class="com.rootser.HdfsFileUtil"> <property name="configuration" 
-		ref="hadoopConf"/> <property name="uri" ref="uri"/> <property name="file" 
-		ref="path"/> <property name="hdfs" ref="hdfs" /> </bean> -->
+	<!--  at first it might seem weird to have this
+	declared as a bean, but if we autowire the random
+	number generator, then we can be sure we're not going to have
+	seed problems -->
+	<bean id="rand" class="java.util.Random" />
 </beans>

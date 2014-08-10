@@ -2,6 +2,7 @@ package com.rootser;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.Random;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
@@ -13,10 +14,15 @@ public class MapInputGenerator {
 	@Autowired
 	 HdfsFileUtil util;
 	
+	@Autowired
+	Random rand;
+	
 	public void run() throws IOException{
 		BufferedWriter br = util.openBufferedWriter("test.txt");
-		br.write("hello much improved file system object.");
-		util.close(br);
+		for (int i = 0; i < Integer.MAX_VALUE; i++){
+			br.write(rand.nextInt());
+		}
+		br.close();
 	}
 
 	public static void main(String[] args) throws Exception{

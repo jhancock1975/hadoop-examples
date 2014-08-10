@@ -10,6 +10,8 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.annotation.PreDestroy;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileStatus;
@@ -43,9 +45,8 @@ public class HdfsFileUtil {
 		BufferedWriter br = new BufferedWriter( new OutputStreamWriter( os, "UTF-8" ) );
 		return br;
 	}
-	
-	public void close(BufferedWriter br) throws IOException{
-		br.close();
+	@PreDestroy
+	private void close() throws IOException{
 		hdfs.close();
 	}
 	/**
