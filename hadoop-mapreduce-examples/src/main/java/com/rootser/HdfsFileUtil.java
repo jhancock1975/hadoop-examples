@@ -2,64 +2,97 @@ package com.rootser;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.io.StringWriter;
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.CompressionCodecFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 @Service
 public class HdfsFileUtil {
 	@Autowired
 	Configuration configuration;
-	/*public void setConfiguration(Configuration conf){
-		this.configuration = conf;
-	}
-	public Configuration getConfiguration(){
-		return this.configuration;
-	}*/
+	
 	@Autowired
 	URI uri;
-	public void setUri(URI uri){
-		this.uri = uri;
-	}
-	public URI getUri(){
-		return this.uri;
-	}
+	
 	@Autowired
 	Path file;
-	public Path getFile() {
-		return file;
-	}
-	public void setFile(Path file) {
-		this.file = file;
-	}
+	
 	@Autowired
 	FileSystem hdfs;
-	public FileSystem getHdfs(){
-		return this.hdfs;
-	}
-	public void setHdfs(FileSystem hdfs){
-		this.hdfs = hdfs;
-	}
+	
 	
 	public BufferedWriter openBufferedWriter(String filePath) throws IOException{
-		FileSystem hdfs = getHdfs();
-		setFile(Path.mergePaths( getFile(), new Path(filePath)));
-		if ( hdfs.exists( getFile() )) {
-			hdfs.delete( getFile(), true ); 
+		Path newfile = (Path.mergePaths( file, new Path(filePath)));
+		if ( hdfs.exists( newfile)) {
+			hdfs.delete( newfile, true ); 
 			} 
-		OutputStream os = hdfs.create( getFile());
+		OutputStream os = hdfs.create( newfile);
 		BufferedWriter br = new BufferedWriter( new OutputStreamWriter( os, "UTF-8" ) );
 		return br;
 	}
 	
 	public void close(BufferedWriter br) throws IOException{
-		br.write("Hello World");
 		br.close();
 		hdfs.close();
 	}
+	/**
+	 * code copied from 
+	 * http://blog.matthewrathbone.com/2013/12/28/Reading-data-from-HDFS-even-if-it-is-compressed.html
+	 * hdfs is for storing big files
+	 * this method reads the contents of a file into a list
+	 * so if you try and read a really big file it is going to use 
+	 * all your RAM.
+	 * 
+	 * @param location
+	 * @param conf
+	 * @return
+	 * @throws IOException
+	 */
+	public List<String> readLines(String fileName) throws IOException{
+		Path location = Path.mergePaths(file, new Path(fileName));
+	    CompressionCodecFactory factory = new CompressionCodecFactory(configuration);
+	    FileStatus[] items = hdfs.listStatus(location);
+	    if (items == null) return new ArrayList<String>();
+	    List<String> results = new ArrayList<String>();
+	    for(FileStatus item: items) {
+
+	      // ignoring files like _SUCCESS
+	      if(item.getPath().getName().startsWith("_")) {
+	        continue;
+	      }
+
+	      CompressionCodec codec = factory.getCodec(item.getPath());
+	      InputStream stream = null;
+
+	      // check if we have a compression codec we need to use
+	      if (codec != null) {
+	        stream = codec.createInputStream(hdfs.open(item.getPath()));
+	      }
+	      else {
+	        stream = hdfs.open(item.getPath());
+	      }
+
+	      StringWriter writer = new StringWriter();
+	      IOUtils.copy(stream, writer, "UTF-8");
+	      String raw = writer.toString();
+	      String[] resulting = raw.split("\n");
+	      for(String str: resulting) {
+	        results.add(str);
+	      }
+	    }
+	    return results;
+	  }
 }
