@@ -34,8 +34,8 @@ public class MatMultMapRed  extends Configured implements Tool{
  
         // Setup MapReduce job
         // Do not specify the number of Reducer
-        job.setMapperClass(MatrixFileMapper.class);
-        job.setReducerClass(Reducer.class);
+        job.setMapperClass(LeftHandMatrixFileMapper.class);
+        job.setReducerClass(MatMultReducer.class);
  
         // Specify key / value
         job.setOutputKeyClass(MatrixColumnEntryWritable.class);

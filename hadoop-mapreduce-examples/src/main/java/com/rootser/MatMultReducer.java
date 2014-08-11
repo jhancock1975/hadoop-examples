@@ -18,5 +18,7 @@ public class MatMultReducer  extends Reducer<MatrixColumnEntryWritable, DoubleWr
 			outputLine.append(d).append(", ");
 		}
 		outputLine.append("\n");
+		outputText.set(outputLine.toString());
+		context.write(outputText, NullWritable.get());
 	}
 }

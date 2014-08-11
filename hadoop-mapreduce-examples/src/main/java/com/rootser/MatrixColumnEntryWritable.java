@@ -5,13 +5,14 @@ import java.io.DataOutput;
 import java.io.IOException;
 
 import org.apache.hadoop.io.Writable;
+import org.apache.hadoop.io.WritableComparable;
 /**
  * this class serves as keys when we want
  * to map row elements of a matrix to 
  * @author john
  *
  */
-public class MatrixColumnEntryWritable implements Writable {
+public class MatrixColumnEntryWritable implements WritableComparable<MatrixColumnEntryWritable> {
 	private int i;
 	private int j;
 
@@ -63,6 +64,11 @@ public class MatrixColumnEntryWritable implements Writable {
 		if (i != other.i)
 			return false;
 		return true;
+	}
+
+	@Override
+	public int compareTo(MatrixColumnEntryWritable o) {
+		return this.i - o.i;
 	}
 
 }
